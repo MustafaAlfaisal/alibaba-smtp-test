@@ -4,64 +4,74 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alibaba Direct Mail SMTP Tester</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <h1>Alibaba Direct Mail SMTP Tester</h1>
-        
-        <div class="smtp-settings">
-            <h2>SMTP Settings</h2>
+        <form id="emailForm">
             <div class="form-group">
-                <label for="smtpHost">SMTP Host:</label>
-                <input type="text" id="smtpHost" value="smtpdm.aliyun.com">
-            </div>
-            <div class="form-group">
-                <label for="smtpPort">SMTP Port:</label>
-                <input type="number" id="smtpPort" value="465">
-            </div>
-            <div class="form-group">
-                <label for="smtpUser">SMTP Username:</label>
-                <input type="text" id="smtpUser" placeholder="Your Alibaba SMTP username">
-            </div>
-            <div class="form-group">
-                <label for="smtpPass">SMTP Password:</label>
-                <input type="password" id="smtpPass" placeholder="Your Alibaba SMTP password">
-            </div>
-        </div>
-
-        <div class="email-content">
-            <h2>Email Details</h2>
-            <div class="form-group">
-                <label for="fromName">From Name:</label>
-                <input type="text" id="fromName" placeholder="Sender Name">
-            </div>
-            <div class="form-group">
-                <label for="fromEmail">From Email:</label>
-                <input type="email" id="fromEmail" placeholder="sender@yourdomain.com">
-            </div>
-            <div class="form-group">
-                <label for="toEmail">To Email:</label>
-                <input type="email" id="toEmail" placeholder="recipient@example.com">
+                <label for="to">Recipient Email:</label>
+                <input type="email" id="to" required>
             </div>
             <div class="form-group">
                 <label for="subject">Subject:</label>
-                <input type="text" id="subject" placeholder="Test Email Subject">
+                <input type="text" id="subject" required>
             </div>
             <div class="form-group">
-                <label for="message">Message:</label>
-                <textarea id="message" rows="5" placeholder="Enter your email message here"></textarea>
+                <label for="text">Message:</label>
+                <textarea id="text" rows="5" required></textarea>
             </div>
-        </div>
-
-        <button id="sendButton" class="send-button">Send Test Email</button>
-        
-        <div id="result" class="result-box hidden">
-            <h3>Result</h3>
-            <pre id="resultContent"></pre>
-        </div>
+            <button type="submit">Send Test Email</button>
+        </form>
+        <div id="result"></div>
     </div>
 
-    <script src="app.js"></script>
+    <script>
+        document.getElementById('emailForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const to = document.getElementById('to').value;
+            const subject = document.getElementById('subject').value;
+            const text = document.getElementById('text').value;
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Sending email...</p>';
+            resultDiv.className = 'status';
+            
+            try {
+                const response = await fetch('/send-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ to, subject, text }),
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <p class="success">Email sent successfully!</p>
+                        <p>Message ID: ${data.info.messageId}</p>
+                    `;
+                    resultDiv.className = 'status success';
+                } else {
+                    resultDiv.innerHTML = `
+                        <p class="error">Failed to send email</p>
+                        <p>Error: ${data.message}</p>
+                        ${data.error ? `<p>Details: ${data.error}</p>` : ''}
+                    `;
+                    resultDiv.className = 'status error';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <p class="error">Network error occurred</p>
+                    <p>${error.message}</p>
+                `;
+                resultDiv.className = 'status error';
+            }
+        });
+    </script>
 </body>
 </html>

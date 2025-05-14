@@ -18,7 +18,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'smtpdm.aliyun.com',
     port: 25, // Alibaba's recommended port (non-SSL)
-    secure: false, // MUST be `false` for port 25
+    secureConnection: false, // MUST be `false` for port 25
     auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASSWORD

@@ -17,11 +17,16 @@ app.use(express.static(path.join(__dirname, 'public')));
 // SMTP Configuration for Alibaba Direct Mail
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'smtpdm.aliyun.com',
-    port: process.env.SMTP_PORT || 25,
-    secure: true,
+    port: 25, // Alibaba's recommended port (non-SSL)
+    secure: false, // MUST be `false` for port 25
     auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASSWORD
+    },
+    tls: {
+        // Force TLSv1.2 (if the server supports it)
+        minVersion: 'TLSv1.2',
+        rejectUnauthorized: false // Use with caution (only for testing)
     }
 });
 

@@ -12,6 +12,11 @@ const PORT = process.env.PORT || 3000;
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Ping route for health checks
+app.get('/ping', (req, res) => {
+  res.status(200).send('pong');
+});
+
 // API Routes
 app.use('/api', emailRouter);
 
@@ -21,7 +26,7 @@ app.get('/', (req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);
     console.log(`Access the application at http://localhost:${PORT}`);
 });
